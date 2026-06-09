@@ -6,7 +6,7 @@ import Bubbles from "./Bubbles";
  */
 const SiteBackground = () => {
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none" aria-hidden="true">
+    <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
       {/* Base soft gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-primary/5 to-background" />
 

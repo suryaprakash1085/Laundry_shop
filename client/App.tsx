@@ -12,6 +12,8 @@ import Dashboard from "./pages/Dashboard";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import AdminLayout from "./components/admin/AdminLayout";
+import RequireAdmin from "./components/admin/RequireAdmin";
+import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminServices from "./pages/admin/AdminServices";
@@ -40,17 +42,20 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/contact" element={<Contact />} />
           </Route>
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminDashboard />} />
-            <Route path="users" element={<AdminUsers />} />
-            <Route path="services" element={<AdminServices />} />
-            <Route path="pricing" element={<AdminPricing />} />
-            <Route path="bookings" element={<AdminBookings />} />
-            <Route path="contact" element={<AdminContact />} />
-            <Route path="customization" element={<AdminCustomization />} />
-            <Route path="analytics" element={<AdminAnalytics />} />
-            <Route path="notifications" element={<AdminNotifications />} />
-            <Route path="settings" element={<AdminSettings />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route element={<RequireAdmin />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="services" element={<AdminServices />} />
+              <Route path="pricing" element={<AdminPricing />} />
+              <Route path="bookings" element={<AdminBookings />} />
+              <Route path="contact" element={<AdminContact />} />
+              <Route path="customization" element={<AdminCustomization />} />
+              <Route path="analytics" element={<AdminAnalytics />} />
+              <Route path="notifications" element={<AdminNotifications />} />
+              <Route path="settings" element={<AdminSettings />} />
+            </Route>
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

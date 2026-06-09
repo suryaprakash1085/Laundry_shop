@@ -1,5 +1,6 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import {
   LayoutDashboard, Users, Sparkles, Tag, CalendarCheck, MessageSquare,
   Palette, Settings, BarChart3, Bell, LogOut, WashingMachine,
@@ -8,6 +9,7 @@ import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, SidebarHeader, useSidebar,
 } from "@/components/ui/sidebar";
+import { adminAuth } from "@/utils/adminAuth";
 
 const mainItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
@@ -28,7 +30,15 @@ const systemItems = [
 const AdminSidebar = () => {
   const { state } = useSidebar();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const collapsed = state === "collapsed";
+
+  const handleLogout = () => {
+    adminAuth.logout();
+    toast.success("Logged out");
+    navigate("/admin/login", { replace: true });
+  };
+
 
   const renderItem = (item: typeof mainItems[number]) => {
     const active = pathname === item.url;
@@ -102,13 +112,13 @@ const AdminSidebar = () => {
                 <p className="text-sm font-semibold">Admin</p>
                 <p className="text-[10px] text-muted-foreground">admin@washy.io</p>
               </div>
-              <button className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive flex items-center justify-center transition-smooth">
+              <button onClick={handleLogout} aria-label="Logout" className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive flex items-center justify-center transition-smooth">
                 <LogOut className="h-4 w-4" />
               </button>
             </div>
           </div>
         ) : (
-          <button className="h-9 w-9 mx-auto rounded-lg hover:bg-destructive/10 hover:text-destructive flex items-center justify-center transition-smooth">
+          <button onClick={handleLogout} aria-label="Logout" className="h-9 w-9 mx-auto rounded-lg hover:bg-destructive/10 hover:text-destructive flex items-center justify-center transition-smooth">
             <LogOut className="h-4 w-4" />
           </button>
         )}

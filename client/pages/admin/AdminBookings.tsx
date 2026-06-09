@@ -1,12 +1,21 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { Calendar, CheckCircle2, Clock, Loader2 } from "lucide-react";
 import PageHeader from "@/components/admin/PageHeader";
-import RowActions, { RowActionType } from "@/components/admin/RowActions";
+import DataTable, { DataTableColumn } from "@/components/admin/DataTable";
 import EntityModal from "@/components/admin/EntityModal";
+import { RowActionType } from "@/components/admin/RowActions";
 import { toast } from "sonner";
 
-const initialBookings = [
+interface Booking {
+  id: string;
+  customer: string;
+  date: string;
+  slot: string;
+  service: string;
+  status: "Completed" | "In Progress" | "Pending";
+}
+
+const initialBookings: Booking[] = [
   { id: "#BK-1001", customer: "Sarah Lee", date: "12 Jun 2026", slot: "9:00 AM", service: "Premium Wash", status: "Completed" },
   { id: "#BK-1002", customer: "John Cruz", date: "12 Jun 2026", slot: "11:30 AM", service: "Dry Cleaning", status: "In Progress" },
   { id: "#BK-1003", customer: "Mia Chen", date: "13 Jun 2026", slot: "2:00 PM", service: "Ironing", status: "Pending" },
@@ -23,16 +32,31 @@ const iconMap: Record<string, any> = { Completed: CheckCircle2, "In Progress": L
 const AdminBookings = () => {
   const [bookings, setBookings] = useState(initialBookings);
   const [mode, setMode] = useState<RowActionType | null>(null);
-  const [selected, setSelected] = useState<typeof initialBookings[number] | null>(null);
+  const [selected, setSelected] = useState<Booking | null>(null);
 
-  const handleAction = (b: typeof initialBookings[number], a: RowActionType) => {
-    setSelected(b); setMode(a);
-  };
+  const columns: DataTableColumn<Booking>[] = [
+    { key: "id", header: "ID", render: (b) => <span className="font-mono text-sm font-semibold">{b.id}</span> },
+    { key: "customer", header: "Customer", render: (b) => <span className="text-sm">{b.customer}</span> },
+    { key: "date", header: "Date", hideOnMobile: true, render: (b) => <span className="inline-flex items-center gap-1 text-sm text-muted-foreground"><Calendar className="h-3 w-3" />{b.date}</span> },
+    { key: "slot", header: "Slot", hideOnMobile: true, render: (b) => <span className="text-sm">{b.slot}</span> },
+    { key: "service", header: "Service", render: (b) => <span className="text-sm">{b.service}</span> },
+    {
+      key: "status", header: "Status",
+      render: (b) => {
+        const Icon = iconMap[b.status];
+        return (
+          <span className={`inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full border ${colorMap[b.status]}`}>
+            <Icon className={`h-3 w-3 ${b.status === "In Progress" ? "animate-spin" : ""}`} /> {b.status}
+          </span>
+        );
+      },
+    },
+  ];
 
   const handleConfirm = () => {
     if (!selected || !mode) return;
     if (mode === "delete") {
-      setBookings(bookings.filter(b => b.id !== selected.id));
+      setBookings(bookings.filter((b) => b.id !== selected.id));
       toast.success(`Booking ${selected.id} cancelled`);
     } else {
       toast.success(`Booking ${selected.id} updated`);
@@ -42,36 +66,13 @@ const AdminBookings = () => {
   return (
     <>
       <PageHeader title="Bookings" subtitle="All scheduled pickups and deliveries." />
-      <div className="gradient-card rounded-2xl border border-border/50 overflow-hidden">
-        <div className="divide-y divide-border/50">
-          {bookings.map((b, i) => {
-            const Icon = iconMap[b.status];
-            return (
-              <motion.div
-                key={b.id}
-                initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }}
-                whileHover={{ backgroundColor: "hsl(var(--accent) / 0.4)" }}
-                className="grid grid-cols-2 md:grid-cols-7 gap-3 items-center p-4 transition-smooth"
-              >
-                <div className="font-mono text-sm font-semibold">{b.id}</div>
-                <div className="text-sm">{b.customer}</div>
-                <div className="flex items-center gap-1 text-sm text-muted-foreground"><Calendar className="h-3 w-3" />{b.date}</div>
-                <div className="text-sm">{b.slot}</div>
-                <div className="text-sm">{b.service}</div>
-                <div>
-                  <span className={`inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full border ${colorMap[b.status]}`}>
-                    <Icon className={`h-3 w-3 ${b.status === "In Progress" ? "animate-spin" : ""}`} /> {b.status}
-                  </span>
-                </div>
-                <div className="flex justify-end">
-                  <RowActions onAction={(a) => handleAction(b, a)} size="sm" />
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-      </div>
-
+      <DataTable<Booking>
+        columns={columns}
+        rows={bookings}
+        searchPlaceholder="Search bookings..."
+        searchKeys={["id", "customer", "service", "status"]}
+        onAction={(row, a) => { setSelected(row); setMode(a); }}
+      />
       <EntityModal
         open={!!mode}
         onOpenChange={(v) => !v && setMode(null)}
