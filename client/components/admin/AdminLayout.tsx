@@ -3,10 +3,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Bell, Search } from "lucide-react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AdminSidebar from "./AdminSidebar";
-import ThemeToggle from "../ThemeToggle";
+import AdminThemeToggle from "./AdminThemeToggle";
+import { useAdminTheme } from "@/hooks/useAdminTheme";
 
 const AdminLayout = () => {
   const location = useLocation();
+  // Activates the independent admin theme (defaults to dark) and
+  // restores the user-side theme on unmount.
+  useAdminTheme();
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-background via-background to-primary/5">
@@ -28,7 +32,7 @@ const AdminLayout = () => {
                 <Bell className="h-4 w-4" />
                 <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-destructive animate-pulse" />
               </button>
-              <ThemeToggle />
+              <AdminThemeToggle />
             </div>
           </header>
           <AnimatePresence mode="wait">

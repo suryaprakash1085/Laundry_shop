@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import Navbar from "./Navbar";
@@ -9,12 +9,18 @@ import SiteBackground from "./SiteBackground";
 const Layout = () => {
   const location = useLocation();
 
-  useEffect(() => {
-    // Instant jump to top on route change — smooth scroll is unreliable on mobile
-    // especially when navigating from a long, scrolled page.
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
+  // Instant jump to top on every route change.
+  // useLayoutEffect runs before paint — prevents the new page from briefly
+  // rendering at the previous scroll position on mobile.
+  useLayoutEffect(() => {
+    const reset = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+    reset();
+    // Second pass after the exit animation settles (mobile Safari quirk).
+    requestAnimationFrame(reset);
   }, [location.pathname]);
 
   return (
@@ -33,8 +39,8 @@ const Layout = () => {
           >
             <Outlet />
           </motion.main>
-          <Footer />
         </AnimatePresence>
+        <Footer />
         <FloatingActions />
       </div>
     </div>

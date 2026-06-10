@@ -1,24 +1,28 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, WashingMachine, X } from "lucide-react";
+import { LogIn, LogOut, Menu, WashingMachine, X } from "lucide-react";
+import { toast } from "sonner";
 import ThemeToggle from "./ThemeToggle";
 import { Button } from "./ui/button";
+import { userAuth } from "@/utils/userAuth";
 
 const links = [
   { to: "/", label: "Home" },
   { to: "/about", label: "About Us" },
   { to: "/services", label: "Services" },
+  { to: "/pricing", label: "Pricing" },
   { to: "/booking", label: "Booking" },
   { to: "/dashboard", label: "Dashboard" },
   { to: "/contact", label: "Contact Us" },
-  { to: "/admin", label: "Admin" },
 ];
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [authed, setAuthed] = useState(userAuth.isAuthed());
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -27,7 +31,17 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => setOpen(false), [location.pathname]);
+  useEffect(() => {
+    setOpen(false);
+    setAuthed(userAuth.isAuthed());
+  }, [location.pathname]);
+
+  const handleLogout = () => {
+    userAuth.logout();
+    setAuthed(false);
+    toast.success("Signed out");
+    navigate("/", { replace: true });
+  };
 
   return (
     <motion.header
@@ -79,8 +93,20 @@ const Navbar = () => {
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <ThemeToggle />
+          {authed ? (
+            <button
+              onClick={handleLogout}
+              className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3 rounded-full text-sm font-medium border border-border/50 hover:bg-muted transition-smooth"
+            >
+              <LogOut className="h-4 w-4" /> Logout
+            </button>
+          ) : (
+            <Link to="/login" className="hidden sm:inline-flex items-center gap-1.5 h-9 px-3 rounded-full text-sm font-medium border border-border/50 hover:bg-muted transition-smooth">
+              <LogIn className="h-4 w-4" /> Login
+            </Link>
+          )}
           <Link to="/booking" className="hidden sm:block">
             <Button variant="hero" size="sm">Book Now</Button>
           </Link>
@@ -130,6 +156,24 @@ const Navbar = () => {
                   </NavLink>
                 </motion.div>
               ))}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: links.length * 0.05 }}
+                className="pt-2 mt-2 border-t border-border/40"
+              >
+                {authed ? (
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2 px-4 py-3 rounded-xl font-medium hover:bg-muted text-left"
+                  >
+                    <LogOut className="h-4 w-4" /> Logout
+                  </button>
+                ) : (
+                  <NavLink to="/login" className="flex items-center gap-2 px-4 py-3 rounded-xl font-medium hover:bg-muted">
+                    <LogIn className="h-4 w-4" /> Login
+                  </NavLink>
+                )}
+              </motion.div>
             </div>
           </motion.div>
         )}

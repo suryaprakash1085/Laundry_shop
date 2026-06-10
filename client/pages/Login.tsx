@@ -1,16 +1,15 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ShieldCheck, User, Sparkles } from "lucide-react";
+import { LogIn, Sparkles, User } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { FormField } from "@/components/auth/FormField";
 import { PasswordInput } from "@/components/auth/PasswordInput";
-import SiteBackground from "@/components/SiteBackground";
-import { adminAuth } from "@/utils/adminAuth";
+import { userAuth } from "@/utils/userAuth";
 
-const AdminLogin = () => {
+const Login = () => {
   const navigate = useNavigate();
   const location = useLocation() as { state?: { from?: string } };
   const [username, setUsername] = useState("");
@@ -28,34 +27,42 @@ const AdminLogin = () => {
 
     setLoading(true);
     setTimeout(() => {
-      if (adminAuth.login(username, password)) {
-        toast.success("Welcome back, Admin");
-        navigate(location.state?.from || "/admin", { replace: true });
+      const profile = userAuth.login(username, password);
+      if (profile) {
+        toast.success(`Welcome back, ${profile.name.split(" ")[0]}`);
+        navigate(location.state?.from || "/dashboard", { replace: true });
       } else {
         toast.error("Invalid credentials");
         setErrors({ password: "Incorrect username or password" });
       }
       setLoading(false);
-    }, 500);
+    }, 400);
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center px-4 py-12">
-      <SiteBackground />
+    <section className="relative min-h-[80vh] flex items-center justify-center px-4 py-12">
       <AuthCard
-        title="Admin Sign In"
-        subtitle="Secure access to the Lavender control panel"
-        icon={<ShieldCheck className="h-7 w-7" />}
+        title="Sign In"
+        subtitle="Access your bookings, addresses & favorites"
+        icon={<LogIn className="h-7 w-7" />}
         footer={
-          <span className="inline-flex items-center gap-1">
-            <Sparkles className="h-3 w-3" /> Demo: <b>admin</b> / <b>admin123</b>
-          </span>
+          <div className="space-y-1">
+            <span className="inline-flex items-center gap-1">
+              <Sparkles className="h-3 w-3" /> Demo: <b>user</b> / <b>user123</b>
+            </span>
+            <p>
+              Are you an administrator?{" "}
+              <Link to="/admin/login" className="text-primary font-semibold hover:underline">
+                Admin sign in
+              </Link>
+            </p>
+          </div>
         }
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <FormField
             label="Username"
-            placeholder="admin"
+            placeholder="user"
             icon={<User className="h-4 w-4" />}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -71,18 +78,14 @@ const AdminLogin = () => {
             autoComplete="current-password"
           />
           <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full h-11 bg-gradient-to-r from-primary to-sky-500 hover:opacity-95 shadow-lg"
-            >
+            <Button type="submit" disabled={loading} className="w-full h-11 bg-gradient-to-r from-primary to-sky-500 hover:opacity-95 shadow-lg">
               {loading ? "Signing in…" : "Sign In"}
             </Button>
           </motion.div>
         </form>
       </AuthCard>
-    </div>
+    </section>
   );
 };
 
-export default AdminLogin;
+export default Login;

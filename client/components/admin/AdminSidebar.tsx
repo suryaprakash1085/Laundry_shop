@@ -2,7 +2,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import {
-  LayoutDashboard, Users, Sparkles, Tag, CalendarCheck, MessageSquare,
+  LayoutDashboard, Users, Sparkles, Tag, Shirt, CalendarCheck, MessageSquare,
   Palette, Settings, BarChart3, Bell, LogOut, WashingMachine,
 } from "lucide-react";
 import {
@@ -15,7 +15,8 @@ const mainItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
   { title: "Users", url: "/admin/users", icon: Users },
   { title: "Services", url: "/admin/services", icon: Sparkles },
-  { title: "Pricing", url: "/admin/pricing", icon: Tag },
+  { title: "Pricing Plans", url: "/admin/pricing", icon: Tag },
+  { title: "Item Pricing", url: "/admin/items", icon: Shirt },
   { title: "Bookings", url: "/admin/bookings", icon: CalendarCheck },
   { title: "Contact", url: "/admin/contact", icon: MessageSquare },
 ];
