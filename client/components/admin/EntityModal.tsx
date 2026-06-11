@@ -1,159 +1,459 @@
 import { ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { AlertTriangle, Eye, Pencil, X } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { RowActionType } from "./RowActions";
 
-interface Field { label: string; value: string | number; full?: boolean }
+import {
+  AlertTriangle,
+  Eye,
+  Pencil,
+  Trash2,
+  X,
+  Sparkles,
+  User2,
+} from "lucide-react";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+
+import { Button } from "@/components/ui/button";
+
+/* =========================================================
+   TYPES
+========================================================= */
+
+type Mode = "view" | "edit" | "delete";
+
+interface Field {
+  label: string;
+  value: string | number;
+  icon?: ReactNode;
+  full?: boolean;
+  editable?: boolean;
+}
 
 interface EntityModalProps {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  mode: RowActionType | null;
+
+  mode?: Mode;
+
   title: string;
   subtitle?: string;
+
   avatar?: ReactNode;
+
   fields?: Field[];
-  onConfirm?: () => void;
-  confirmLabel?: string;
+
   children?: ReactNode;
+
+  onConfirm?: () => void;
+
+  confirmLabel?: string;
 }
 
-const modeMeta: Record<RowActionType, { icon: any; tint: string; label: string }> = {
-  view: { icon: Eye, tint: "from-primary/30 to-primary/5 text-primary", label: "Viewing" },
-  edit: { icon: Pencil, tint: "from-warning/30 to-warning/5 text-warning", label: "Editing" },
-  delete: { icon: AlertTriangle, tint: "from-destructive/30 to-destructive/5 text-destructive", label: "Delete" },
+/* =========================================================
+   MODE CONFIG
+========================================================= */
+
+const modeConfig: Record<
+  Mode,
+  {
+    icon: any;
+    gradient: string;
+    badge: string;
+    button: string;
+    label: string;
+  }
+> = {
+  view: {
+    icon: Eye,
+
+    gradient:
+      "from-violet-500/20 via-fuchsia-500/10 to-transparent",
+
+    badge:
+      "bg-violet-500/10 text-violet-300 border-violet-400/20",
+
+    button:
+      "bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white",
+
+    label: "View Mode",
+  },
+
+  edit: {
+    icon: Pencil,
+
+    gradient:
+      "from-cyan-500/20 via-blue-500/10 to-transparent",
+
+    badge:
+      "bg-cyan-500/10 text-cyan-300 border-cyan-400/20",
+
+    button:
+      "bg-gradient-to-r from-cyan-400 to-blue-500 text-black",
+
+    label: "Edit Mode",
+  },
+
+  delete: {
+    icon: Trash2,
+
+    gradient:
+      "from-red-500/20 via-rose-500/10 to-transparent",
+
+    badge:
+      "bg-red-500/10 text-red-300 border-red-400/20",
+
+    button:
+      "bg-gradient-to-r from-red-500 to-rose-500 text-white",
+
+    label: "Danger Zone",
+  },
 };
 
-const EntityModal = ({ open, onOpenChange, mode, title, subtitle, avatar, fields = [], onConfirm, confirmLabel, children }: EntityModalProps) => {
-  if (!mode) return null;
-  const meta = modeMeta[mode];
-  const Icon = meta.icon;
+/* =========================================================
+   COMPONENT
+========================================================= */
+
+const EntityModal = ({
+  open,
+  onOpenChange,
+
+  mode = "view",
+
+  title,
+  subtitle,
+
+  avatar,
+
+  fields = [],
+
+  children,
+
+  onConfirm,
+
+  confirmLabel,
+}: EntityModalProps) => {
+  /* =========================================================
+     SAFE CONFIG
+  ========================================================= */
+
+  const config = modeConfig[mode || "view"];
+
+  if (!config) return null;
+
+  const Icon = config.icon;
+
+  /* =========================================================
+     RETURN
+  ========================================================= */
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0 overflow-hidden border border-white/10 bg-[#060816]/95 backdrop-blur-2xl shadow-[0_0_80px_rgba(0,153,255,0.15)] rounded-3xl">
-  <AnimatePresence>
-    {open && (
-      <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        className="relative"
-      >
-        {/* Background Glow */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
-          <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-blue-600/10 blur-3xl" />
-        </div>
+      <DialogContent className="max-w-6xl overflow-hidden rounded-[36px] border border-white/10 bg-[#050816] p-0 shadow-[0_0_120px_rgba(0,0,0,0.8)] backdrop-blur-3xl">
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              initial={{
+                opacity: 0,
+                scale: 0.94,
+                y: 30,
+              }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                y: 0,
+              }}
+              exit={{
+                opacity: 0,
+                scale: 0.96,
+              }}
+              transition={{
+                duration: 0.4,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              className="relative"
+            >
+              {/* =========================================================
+                  BACKGROUND
+              ========================================================= */}
 
-        {/* Header */}
-        <div className="relative px-7 pt-7 pb-6 border-b border-white/5 bg-gradient-to-br from-[#0b1225] via-[#0a1020] to-[#070b16]">
-          <span className="absolute top-5 right-5 text-[10px] font-bold uppercase tracking-[0.25em] px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/20 text-cyan-300 backdrop-blur-md">
-            {meta.label}
-          </span>
+              <div className="absolute inset-0 overflow-hidden">
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${config.gradient}`}
+                />
 
-          <div className="flex items-center gap-5">
-            {avatar || (
-              <div className="relative h-16 w-16 rounded-3xl bg-gradient-to-br from-cyan-500/20 to-blue-500/10 border border-cyan-400/20 flex items-center justify-center shadow-[0_0_40px_rgba(0,180,255,0.25)]">
-                <div className="absolute inset-0 rounded-3xl bg-cyan-400/10 blur-xl" />
-                <Icon className="h-7 w-7 text-cyan-300 relative z-10" />
+                <div className="absolute -top-40 right-[-120px] h-96 w-96 rounded-full bg-violet-500/10 blur-3xl" />
+
+                <div className="absolute bottom-[-150px] left-[-100px] h-96 w-96 rounded-full bg-cyan-500/10 blur-3xl" />
               </div>
-            )}
 
-            <DialogHeader className="flex-1 text-left">
-              <DialogTitle className="text-3xl font-bold text-white tracking-tight">
-                {title}
-              </DialogTitle>
+              {/* =========================================================
+                  MAIN LAYOUT
+              ========================================================= */}
 
-              {subtitle && (
-                <DialogDescription className="mt-1 text-sm text-slate-400">
-                  {subtitle}
-                </DialogDescription>
-              )}
-            </DialogHeader>
-          </div>
-        </div>
+              <div className="relative grid lg:grid-cols-[340px_1fr]">
+                {/* =========================================================
+                    LEFT SIDE
+                ========================================================= */}
 
-        {/* Content */}
-        <div className="relative p-7 space-y-5">
-          {mode === "delete" ? (
-            <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5 text-sm text-slate-300">
-              Are you sure you want to permanently delete{" "}
-              <span className="font-semibold text-white">{title}</span>?
-              This action cannot be undone.
-            </div>
-          ) : (
-            <div className="grid sm:grid-cols-2 gap-4">
-              {fields.map((f, i) => (
-                <motion.div
-                  key={f.label + i}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.08 + i * 0.05 }}
-                  className={`group relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.03] backdrop-blur-xl p-4 hover:border-cyan-400/20 hover:bg-cyan-500/[0.03] transition-all duration-300 ${
-                    f.full ? "sm:col-span-2" : ""
-                  }`}
-                >
-                  {/* Glow */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500">
-                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/5 to-blue-500/5" />
+                <div className="relative border-r border-white/10 bg-white/[0.02] p-8">
+                  {/* Badge */}
+
+                  <div
+                    className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[11px] font-bold uppercase tracking-[0.2em] ${config.badge}`}
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+
+                    {config.label}
                   </div>
 
-                  <p className="relative text-[10px] uppercase tracking-[0.2em] text-slate-500 font-bold">
-                    {f.label}
-                  </p>
+                  {/* Avatar */}
 
-                  {mode === "edit" ? (
-                    <input
-                      defaultValue={String(f.value)}
-                      className="relative w-full mt-3 bg-transparent outline-none text-base font-semibold text-white placeholder:text-slate-500 focus:text-cyan-300"
-                    />
-                  ) : (
-                    <p className="relative mt-3 text-base font-semibold text-white break-words">
-                      {f.value}
-                    </p>
-                  )}
-                </motion.div>
-              ))}
-            </div>
+                  <div className="mt-8 flex justify-center">
+                    {avatar || (
+                      <motion.div
+                        animate={{
+                          rotate: [0, 2, -2, 0],
+                        }}
+                        transition={{
+                          duration: 5,
+                          repeat: Infinity,
+                        }}
+                        className="relative flex h-48 w-48 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]"
+                      >
+                        {/* Glow */}
+
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-500/20 to-cyan-500/10 blur-xl" />
+
+                        {/* Ring */}
+
+                        <div className="absolute inset-4 rounded-full border border-white/10" />
+
+                        {/* Icon */}
+
+                        <Icon className="relative z-10 h-20 w-20 text-white" />
+                      </motion.div>
+                    )}
+                  </div>
+
+                  {/* Title */}
+
+                  <div className="mt-8 text-center">
+                    <h2 className="text-4xl font-black tracking-tight text-white">
+                      {title}
+                    </h2>
+
+                    {subtitle && (
+                      <p className="mt-3 text-lg text-slate-400">
+                        {subtitle}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Decoration */}
+
+                  <div className="absolute bottom-10 left-1/2 h-24 w-[2px] -translate-x-1/2 bg-gradient-to-b from-cyan-400 to-transparent" />
+                </div>
+
+                {/* =========================================================
+                    RIGHT SIDE
+                ========================================================= */}
+
+                <div className="relative">
+                  {/* Header */}
+
+                  <div className="flex items-start justify-between border-b border-white/10 px-8 py-7">
+                    <DialogHeader className="space-y-3 text-left">
+                      <DialogTitle className="text-3xl font-black text-white">
+                        {title} Details
+                      </DialogTitle>
+
+                      <DialogDescription className="max-w-xl text-sm leading-relaxed text-slate-400">
+                        View and manage all entity information using
+                        this futuristic reusable modal component.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    {/* Close */}
+
+                    <button
+                      onClick={() => onOpenChange(false)}
+                      className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-slate-400 transition-all hover:rotate-90 hover:bg-white/[0.08] hover:text-white"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+
+                  {/* =========================================================
+                      BODY
+                  ========================================================= */}
+
+                  <div className="p-8">
+                    {/* DELETE MODE */}
+
+                    {mode === "delete" ? (
+                      <motion.div
+                        initial={{
+                          opacity: 0,
+                          y: 20,
+                        }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                        }}
+                        className="rounded-3xl border border-red-500/20 bg-red-500/10 p-8"
+                      >
+                        <div className="flex items-start gap-5">
+                          {/* Warning Icon */}
+
+                          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-500/20">
+                            <AlertTriangle className="h-8 w-8 text-red-300" />
+                          </div>
+
+                          {/* Content */}
+
+                          <div>
+                            <h3 className="text-2xl font-bold text-white">
+                              Delete Confirmation
+                            </h3>
+
+                            <p className="mt-3 text-sm leading-relaxed text-slate-300">
+                              You are about to permanently delete
+                              <span className="mx-1 font-bold text-white">
+                                {title}
+                              </span>
+                              from the system.
+                            </p>
+
+                            <p className="mt-3 text-sm font-medium text-red-300">
+                              This action cannot be undone.
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ) : (
+                      /* =========================================================
+                          FIELDS
+                      ========================================================= */
+
+                      <div className="grid gap-5 sm:grid-cols-2">
+                        {fields.map((field, i) => (
+                          <motion.div
+                            key={field.label + i}
+                            initial={{
+                              opacity: 0,
+                              y: 20,
+                            }}
+                            animate={{
+                              opacity: 1,
+                              y: 0,
+                            }}
+                            transition={{
+                              delay: i * 0.05,
+                            }}
+                            className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-2xl transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.06]
+                            
+                            ${
+                              field.full ? "sm:col-span-2" : ""
+                            }`}
+                          >
+                            {/* Hover Glow */}
+
+                            <div className="absolute inset-0 opacity-0 transition duration-500 group-hover:opacity-100">
+                              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent" />
+                            </div>
+
+                            {/* Content */}
+
+                            <div className="relative flex items-start gap-4">
+                              {/* Icon */}
+
+                              {field.icon && (
+                                <div className="mt-1 text-cyan-300">
+                                  {field.icon}
+                                </div>
+                              )}
+
+                              {/* Info */}
+
+                              <div className="w-full">
+                                <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500">
+                                  {field.label}
+                                </p>
+
+                                {/* EDIT */}
+
+                                {mode === "edit" &&
+                                field.editable !== false ? (
+                                  <input
+                                    defaultValue={String(field.value)}
+                                    className="mt-4 w-full border-none bg-transparent text-lg font-semibold text-white outline-none placeholder:text-slate-500 focus:text-cyan-300"
+                                  />
+                                ) : (
+                                  /* VIEW */
+                                  <p className="mt-4 break-words text-lg font-semibold text-white">
+                                    {field.value}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* EXTRA CHILDREN */}
+
+                    {children}
+                  </div>
+
+                  {/* =========================================================
+                      FOOTER
+                  ========================================================= */}
+
+                  <DialogFooter className="border-t border-white/10 bg-white/[0.02] px-8 py-6">
+                    <div className="flex w-full flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                      {/* Cancel */}
+
+                      <Button
+                        variant="outline"
+                        onClick={() => onOpenChange(false)}
+                        className="h-12 rounded-2xl border-white/10 bg-white/[0.04] px-6 text-slate-300 hover:bg-white/[0.08] hover:text-white"
+                      >
+                        Cancel
+                      </Button>
+
+                      {/* Action */}
+
+                      {mode !== "view" && (
+                        <Button
+                          onClick={() => {
+                            onConfirm?.();
+
+                            onOpenChange(false);
+                          }}
+                          className={`h-12 rounded-2xl px-8 font-bold shadow-2xl transition-all duration-300 hover:scale-[1.03] ${config.button}`}
+                        >
+                          {confirmLabel ||
+                            (mode === "delete"
+                              ? "Delete Now"
+                              : "Save Changes")}
+                        </Button>
+                      )}
+                    </div>
+                  </DialogFooter>
+                </div>
+              </div>
+            </motion.div>
           )}
-
-          {children}
-        </div>
-
-        {/* Footer */}
-        <DialogFooter className="relative px-7 pb-7 gap-3">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            className="h-12 px-6 rounded-2xl border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06] hover:text-white"
-          >
-            <X className="h-4 w-4 mr-2" />
-            Cancel
-          </Button>
-
-          {mode !== "view" && (
-            <Button
-              onClick={() => {
-                onConfirm?.();
-                onOpenChange(false);
-              }}
-              className={`h-12 px-7 rounded-2xl font-semibold shadow-lg transition-all duration-300 ${
-                mode === "delete"
-                  ? "bg-red-500 hover:bg-red-600 text-white shadow-red-500/30"
-                  : "bg-gradient-to-r from-cyan-400 to-blue-500 hover:scale-[1.02] text-black shadow-cyan-500/30"
-              }`}
-            >
-              {confirmLabel || (mode === "delete" ? "Delete" : "Save Changes")}
-            </Button>
-          )}
-        </DialogFooter>
-      </motion.div>
-    )}
-  </AnimatePresence>
-</DialogContent>
+        </AnimatePresence>
+      </DialogContent>
     </Dialog>
   );
 };

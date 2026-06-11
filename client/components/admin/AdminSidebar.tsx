@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import {
   LayoutDashboard, Users, Sparkles, Tag, Shirt, CalendarCheck, MessageSquare,
-  Palette, Settings, BarChart3, Bell, LogOut, WashingMachine,
+  Palette, Settings, BarChart3, Bell, LogOut, WashingMachine, FileText,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -22,6 +22,7 @@ const mainItems = [
 ];
 
 const systemItems = [
+  { title: "Page Content", url: "/admin/content", icon: FileText },
   { title: "Customization", url: "/admin/customization", icon: Palette },
   { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
   { title: "Notifications", url: "/admin/notifications", icon: Bell },

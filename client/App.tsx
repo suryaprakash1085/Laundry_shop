@@ -25,6 +25,7 @@ import AdminItemPricing from "./pages/admin/AdminItemPricing";
 import AdminBookings from "./pages/admin/AdminBookings";
 import AdminContact from "./pages/admin/AdminContact";
 import AdminCustomization from "./pages/admin/AdminCustomization";
+import AdminPageContent from "./pages/admin/AdminPageContent";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminNotifications from "./pages/admin/AdminNotifications";
 import AdminSettings from "./pages/admin/AdminSettings";
@@ -61,6 +62,7 @@ const App = () => (
               <Route path="bookings" element={<AdminBookings />} />
               <Route path="contact" element={<AdminContact />} />
               <Route path="customization" element={<AdminCustomization />} />
+              <Route path="content" element={<AdminPageContent />} />
               <Route path="analytics" element={<AdminAnalytics />} />
               <Route path="notifications" element={<AdminNotifications />} />
               <Route path="settings" element={<AdminSettings />} />
