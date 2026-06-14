@@ -2,13 +2,13 @@ import knex from "knex";
 import "dotenv/config";
 
 const db = knex({
-  client: "pg",
-  connection: process.env.DATABASE_URL || {
-    host: process.env.PGHOST || "localhost",
-    port: parseInt(process.env.PGPORT || "5432"),
-    user: process.env.PGUSER || "postgres",
-    password: process.env.PGPASSWORD || "",
-    database: process.env.PGDATABASE || "laundry_shop",
+  client: "mysql2",
+  connection: {
+    host: process.env.DB_HOST || "localhost",
+    port: parseInt(process.env.DB_PORT || "3306"),
+    user: process.env.DB_USER || "root",
+    password: process.env.DB_PASSWORD || "",
+    database: process.env.DB_NAME || "landery_shop",
   },
   migrations: {
     extension: "ts",
