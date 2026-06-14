@@ -1,111 +1,78 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import { handleDemo } from "./routes/demo";
-import { handleLogin, handleLogout } from "./routes/auth";
-import { handleGetDashboardStats } from "./routes/dashboard";
-import {
-  getServices,
-  getServiceById,
-  createService,
-  updateService,
-  deleteService,
-} from "./routes/services";
-import {
-  getCustomers,
-  getCustomerById,
-  createCustomer,
-  updateCustomer,
-  deleteCustomer,
-} from "./routes/customers";
-import {
-  getOrders,
-  getOrderById,
-  createOrder,
-  updateOrder,
-  deleteOrder,
-} from "./routes/orders";
-import {
-  getStaff,
-  getStaffById,
-  createStaff,
-  updateStaff,
-  deleteStaff,
-} from "./routes/staff";
-import {
-  getDailyReport,
-  getMonthlyReport,
-  getOrderSummary,
-} from "./routes/reports";
-import { getSettings, updateSettings } from "./routes/settings";
-import {
-  getCustomization,
-  updateCustomization,
-  getThemeConfig,
-} from "./routes/customization";
+import bcrypt from "bcryptjs";
+
+import { sequelize, User } from "./models";
+import { errorHandler } from "./middleware/errorHandler";
+
+import authRoutes from "./routes/auth";
+import trackingRoutes from "./routes/tracking";
+import serviceRoutes from "./routes/services";
+import customerRoutes from "./routes/customers";
+import orderRoutes from "./routes/orders";
+import staffRoutes from "./routes/staff";
+import settingsRoutes from "./routes/settings";
+import customizationRoutes from "./routes/customization";
+import dashboardRoutes from "./routes/dashboard";
+import reportsRoutes from "./routes/reports";
+
+async function seedDefaultUsers() {
+  const adminExists = await User.findOne({ where: { username: "admin" } });
+  if (!adminExists) {
+    await User.create({
+      username: "admin",
+      name: "Admin User",
+      email: "admin@mslaundry.com",
+      password: await bcrypt.hash("admin123", 10),
+      role: "admin",
+    });
+    console.log("✅ Default admin user created (admin / admin123)");
+  }
+
+  const userExists = await User.findOne({ where: { username: "user" } });
+  if (!userExists) {
+    await User.create({
+      username: "user",
+      name: "Priya Ramesh",
+      email: "priya@example.com",
+      password: await bcrypt.hash("user123", 10),
+      role: "user",
+    });
+    console.log("✅ Default user created (user / user123)");
+  }
+}
 
 export function createServer() {
   const app = express();
 
-  // Middleware
   app.use(cors());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  // Example API routes
-  app.get("/api/ping", (_req, res) => {
-    const ping = process.env.PING_MESSAGE ?? "ping";
-    res.json({ message: ping });
-  });
+  // Health check
+  app.get("/api/ping", (_req, res) => res.json({ message: "pong" }));
 
-  app.get("/api/demo", handleDemo);
+  // Routes
+  app.use("/api/auth", authRoutes);
+  app.use("/api/track", trackingRoutes);
+  app.use("/api/services", serviceRoutes);
+  app.use("/api/customers", customerRoutes);
+  app.use("/api/orders", orderRoutes);
+  app.use("/api/staff", staffRoutes);
+  app.use("/api/settings", settingsRoutes);
+  app.use("/api/customization", customizationRoutes);
+  app.use("/api/dashboard", dashboardRoutes);
+  app.use("/api/reports", reportsRoutes);
 
-  // Admin Panel API routes
-  app.post("/api/auth/login", handleLogin);
-  app.post("/api/auth/logout", handleLogout);
-  app.get("/api/dashboard/stats", handleGetDashboardStats);
+  // Error handler (must be last)
+  app.use(errorHandler);
 
-  // Services routes
-  app.get("/api/services", getServices);
-  app.get("/api/services/:id", getServiceById);
-  app.post("/api/services", createService);
-  app.patch("/api/services/:id", updateService);
-  app.delete("/api/services/:id", deleteService);
-
-  // Customers routes
-  app.get("/api/customers", getCustomers);
-  app.get("/api/customers/:id", getCustomerById);
-  app.post("/api/customers", createCustomer);
-  app.patch("/api/customers/:id", updateCustomer);
-  app.delete("/api/customers/:id", deleteCustomer);
-
-  // Orders routes
-  app.get("/api/orders", getOrders);
-  app.get("/api/orders/:id", getOrderById);
-  app.post("/api/orders", createOrder);
-  app.patch("/api/orders/:id", updateOrder);
-  app.delete("/api/orders/:id", deleteOrder);
-
-  // Staff routes
-  app.get("/api/staff", getStaff);
-  app.get("/api/staff/:id", getStaffById);
-  app.post("/api/staff", createStaff);
-  app.patch("/api/staff/:id", updateStaff);
-  app.delete("/api/staff/:id", deleteStaff);
-
-  // Reports routes
-  app.get("/api/reports/daily", getDailyReport);
-  app.get("/api/reports/monthly", getMonthlyReport);
-  app.get("/api/reports/summary", getOrderSummary);
-
-  // Settings routes
-  app.get("/api/settings", getSettings);
-  app.patch("/api/settings", updateSettings);
-
-  // Customization routes
-  app.get("/api/customization", getCustomization);
-  app.patch("/api/customization", updateCustomization);
-  app.get("/api/customization/theme", getThemeConfig);
+  // Sync Sequelize models and seed default users
+  sequelize
+    .sync({ alter: false })
+    .then(() => seedDefaultUsers())
+    .catch((err) => console.error("DB sync error:", err));
 
   return app;
 }
