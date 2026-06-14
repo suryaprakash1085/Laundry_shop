@@ -1,7 +1,6 @@
-import type { Knex } from "knex";
-import "dotenv/config";
+require("dotenv").config();
 
-const config: { [key: string]: Knex.Config } = {
+module.exports = {
   development: {
     client: "pg",
     connection: process.env.DATABASE_URL || {
@@ -12,14 +11,12 @@ const config: { [key: string]: Knex.Config } = {
       database: process.env.PGDATABASE || "laundry_shop",
     },
     migrations: {
-      extension: "ts",
       directory: "./server/migrations",
+      extension: "ts",
     },
     seeds: {
-      extension: "ts",
       directory: "./server/seeds",
+      extension: "ts",
     },
   },
 };
-
-module.exports = config;

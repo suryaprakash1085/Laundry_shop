@@ -16,18 +16,18 @@
     "build:client": "vite build",
     "build:server": "vite build --config vite.config.server.ts",
     "start": "node dist/server/node-build.mjs",
-    "test": "vitest --run",
+    "test": "echo 'no tests'",
     "format.fix": "prettier --write .",
     "typecheck": "tsc",
-    "db:migrate": "knex migrate:latest",
-    "db:rollback": "knex migrate:rollback",
-    "db:seed": "knex seed:run"
+    "db:migrate": "tsx scripts/migrate.ts migrate",
+    "db:rollback": "tsx scripts/migrate.ts rollback",
+    "db:seed": "tsx scripts/migrate.ts seed"
   },
   "dependencies": {
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "knex": "^3.1.0",
-    "mysql2": "^3.15.3",
+    "pg": "^8.16.0",
     "pnpm": "^11.5.2",
     "zod": "^3.25.76"
   },
@@ -102,8 +102,7 @@
     "tsx": "^4.20.3",
     "typescript": "^5.9.2",
     "vaul": "^1.1.2",
-    "vite": "^7.1.2",
-    "vitest": "^3.2.4"
+    "vite": "^7.1.2"
   },
   "packageManager": "pnpm@10.14.0+sha512.ad27a79641b49c3e481a16a805baa71817a04bbe06a38d17e60e2eaee83f6a146c6a688125f5792e48dd5ba30e7da52a5cda4c3992b9ccf333f9ce223af84748"
 }

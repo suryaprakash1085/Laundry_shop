@@ -1,17 +1,17 @@
 import { defineConfig, Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { createServer } from "./server/index"; // usa el alias
+import { createServer } from "./server/index";
 
 export default defineConfig(({ mode }) => ({
   server: {
-    host: "::",
-    port: 9000,
-  fs: {
-  allow: ["./", "./client", "./shared"], // <-- added "./" for root
-  deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "server/**"],
-},
-
+    host: "0.0.0.0",
+    port: 5000,
+    allowedHosts: true,
+    fs: {
+      allow: ["./", "./client", "./shared"],
+      deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "server/**"],
+    },
   },
   build: {
     outDir: "dist/spa",
@@ -36,4 +36,3 @@ function expressPlugin(): Plugin {
     },
   };
 }
-

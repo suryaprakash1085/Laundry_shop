@@ -1,6 +1,5 @@
 import { RequestHandler } from "express";
-// import db from "@/server/db";
-import db from "../db"
+import db from "../db";
 import { Service } from "@shared/api";
 
 export const getServices: RequestHandler = async (req, res) => {
@@ -37,14 +36,17 @@ export const createService: RequestHandler = async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const [id] = await db("services").insert({
-      name,
-      description,
-      category,
-      price: parseFloat(price),
-      enabled: enabled ?? true,
-    });
+    const [row] = await db("services")
+      .insert({
+        name,
+        description,
+        category,
+        price: parseFloat(price),
+        enabled: enabled ?? true,
+      })
+      .returning("id");
 
+    const id = row?.id ?? row;
     const service = await db("services").where("id", id).first();
     res.status(201).json(service);
   } catch (error) {

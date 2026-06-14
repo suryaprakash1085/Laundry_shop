@@ -1,13 +1,11 @@
 import { RequestHandler } from "express";
-// import db from "@/server/db";
-import db from "../db"
+import db from "../db";
 
 export const getCustomization: RequestHandler = async (req, res) => {
   try {
     let customization = await db("customization").first();
 
     if (!customization) {
-      // Create default customization if none exists
       await db("customization").insert({
         app_name: "MS Laundry",
         primary_color: "#3b82f6",
@@ -56,10 +54,8 @@ export const updateCustomization: RequestHandler = async (req, res) => {
     let customization = await db("customization").first();
 
     if (!customization) {
-      // Create if doesn't exist
       await db("customization").insert(updates);
     } else {
-      // Update existing
       await db("customization").update({
         ...updates,
         updated_at: db.fn.now(),

@@ -1,6 +1,5 @@
 import { RequestHandler } from "express";
-// import db from "@/server/db";
-import db from "../db"
+import db from "../db";
 import { Order, OrderItem } from "@shared/api";
 
 export const getOrders: RequestHandler = async (req, res) => {
@@ -39,7 +38,6 @@ export const getOrderById: RequestHandler = async (req, res) => {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    // Get order items
     const items = await db("order_items")
       .leftJoin("services", "order_items.service_id", "services.id")
       .where("order_items.order_id", id)
@@ -66,16 +64,19 @@ export const createOrder: RequestHandler = async (req, res) => {
       0,
     );
 
-    const [orderId] = await db("orders").insert({
-      order_number: orderNumber,
-      customer_id,
-      order_type,
-      total_amount: totalAmount,
-      notes: notes || null,
-      status: "pending",
-    });
+    const [row] = await db("orders")
+      .insert({
+        order_number: orderNumber,
+        customer_id,
+        order_type,
+        total_amount: totalAmount,
+        notes: notes || null,
+        status: "pending",
+      })
+      .returning("id");
 
-    // Insert order items
+    const orderId = row?.id ?? row;
+
     const orderItems = items.map((item: any) => ({
       order_id: orderId,
       service_id: item.service_id,
@@ -148,7 +149,6 @@ export const deleteOrder: RequestHandler = async (req, res) => {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    // Delete order items first (foreign key constraint)
     await db("order_items").where("order_id", id).del();
     await db("orders").where("id", id).del();
 

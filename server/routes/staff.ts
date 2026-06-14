@@ -1,6 +1,5 @@
 import { RequestHandler } from "express";
-// import db from "@/server/db";
-import db from "../db"
+import db from "../db";
 import { Staff } from "@shared/api";
 
 export const getStaff: RequestHandler = async (req, res) => {
@@ -39,15 +38,18 @@ export const createStaff: RequestHandler = async (req, res) => {
         .json({ error: "Name, email, and phone are required" });
     }
 
-    const [id] = await db("staff").insert({
-      name,
-      email,
-      phone,
-      role: role || "staff",
-      permissions: JSON.stringify(permissions || []),
-      active: true,
-    });
+    const [row] = await db("staff")
+      .insert({
+        name,
+        email,
+        phone,
+        role: role || "staff",
+        permissions: JSON.stringify(permissions || []),
+        active: true,
+      })
+      .returning("id");
 
+    const id = row?.id ?? row;
     const staff = await db("staff").where("id", id).first();
     res.status(201).json(staff);
   } catch (error) {

@@ -1,7 +1,5 @@
 import { RequestHandler } from "express";
-// import db from "./db";
-// import db from "./db";
-import db from "../db"
+import db from "../db";
 import { DailyReport, MonthlyReport } from "@shared/api";
 
 export const getDailyReport: RequestHandler = async (req, res) => {
@@ -19,7 +17,7 @@ export const getDailyReport: RequestHandler = async (req, res) => {
       (o) => o.status === "delivered",
     ).length;
     const totalRevenue = orders.reduce(
-      (sum, o) => sum + (o.total_amount || 0),
+      (sum, o) => sum + parseFloat(o.total_amount || 0),
       0,
     );
 
@@ -49,10 +47,10 @@ export const getMonthlyReport: RequestHandler = async (req, res) => {
 
     const orders = await db("orders")
       .where(
-        db.raw(`YEAR(created_at) = ? AND MONTH(created_at) = ?`, [
-          currentYear,
-          currentMonth,
-        ]),
+        db.raw(
+          `EXTRACT(YEAR FROM created_at) = ? AND EXTRACT(MONTH FROM created_at) = ?`,
+          [currentYear, currentMonth],
+        ),
       )
       .select("*");
 
@@ -61,10 +59,10 @@ export const getMonthlyReport: RequestHandler = async (req, res) => {
       (o) => o.status === "delivered",
     ).length;
     const totalRevenue = orders.reduce(
-      (sum, o) => sum + (o.total_amount || 0),
+      (sum, o) => sum + parseFloat(o.total_amount || 0),
       0,
     );
-    const totalExpenses = 0; // TODO: Add expense tracking
+    const totalExpenses = 0;
 
     const report = {
       month: new Date(currentYear, currentMonth - 1).toLocaleString("en-US", {
@@ -95,7 +93,10 @@ export const getOrderSummary: RequestHandler = async (req, res) => {
       processing: orders.filter((o) => o.status === "processing").length,
       ready: orders.filter((o) => o.status === "ready").length,
       delivered: orders.filter((o) => o.status === "delivered").length,
-      totalRevenue: orders.reduce((sum, o) => sum + (o.total_amount || 0), 0),
+      totalRevenue: orders.reduce(
+        (sum, o) => sum + parseFloat(o.total_amount || 0),
+        0,
+      ),
     };
 
     res.json(summary);

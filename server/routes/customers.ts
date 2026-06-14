@@ -1,6 +1,5 @@
 import { RequestHandler } from "express";
-import db from "../db"
-
+import db from "../db";
 import { Customer } from "@shared/api";
 
 export const getCustomers: RequestHandler = async (req, res) => {
@@ -37,15 +36,18 @@ export const createCustomer: RequestHandler = async (req, res) => {
       return res.status(400).json({ error: "Name and phone are required" });
     }
 
-    const [id] = await db("customers").insert({
-      name,
-      email: email || null,
-      phone,
-      address: address || null,
-      total_orders: 0,
-      total_spent: 0,
-    });
+    const [row] = await db("customers")
+      .insert({
+        name,
+        email: email || null,
+        phone,
+        address: address || null,
+        total_orders: 0,
+        total_spent: 0,
+      })
+      .returning("id");
 
+    const id = row?.id ?? row;
     const customer = await db("customers").where("id", id).first();
     res.status(201).json(customer);
   } catch (error) {
